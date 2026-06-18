@@ -235,6 +235,13 @@ class SentenceTransformersTextEmbedder:
                 "SentenceTransformersTextEmbedder expects a string as input."
                 "In case you want to embed a list of Documents, please use the SentenceTransformersDocumentEmbedder."
             )
+        if self.precision in {"int8", "uint8"}:
+            raise ValueError(
+                "SentenceTransformersTextEmbedder cannot use int8 or uint8 precision for a single text. "
+                "Sentence Transformers computes quantization ranges from the provided embeddings, so a single text "
+                "collapses to a constant vector. Use precision='float32' for query embeddings, or quantize batches "
+                "with enough calibration examples."
+            )
         if self.embedding_backend is None:
             self.warm_up()
 

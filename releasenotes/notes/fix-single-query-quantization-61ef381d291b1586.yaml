@@ -1,0 +1,5 @@
+---
+fixes:
+  - |
+    Prevents ``SentenceTransformersTextEmbedder`` from returning degenerate ``int8`` or ``uint8`` embeddings for single-text queries.
+    The component now raises a clear error instead of silently producing unusable quantized vectors.

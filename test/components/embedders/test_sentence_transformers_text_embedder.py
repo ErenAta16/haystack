@@ -278,6 +278,16 @@ class TestSentenceTransformersTextEmbedder:
         assert isinstance(embedding, list)
         assert all(isinstance(el, float) for el in embedding)
 
+    @pytest.mark.parametrize("precision", ["int8", "uint8"])
+    def test_run_rejects_range_quantization_for_single_text(self, precision):
+        embedder = SentenceTransformersTextEmbedder(model="model", precision=precision)
+        embedder.embedding_backend = MagicMock()
+
+        with pytest.raises(ValueError, match="cannot use int8 or uint8 precision for a single text"):
+            embedder.run(text="a nice text to embed")
+
+        embedder.embedding_backend.embed.assert_not_called()
+
     def test_run_wrong_input_format(self):
         embedder = SentenceTransformersTextEmbedder(model="model")
         embedder.embedding_backend = MagicMock()
@@ -413,9 +423,9 @@ class TestSentenceTransformersTextEmbedder:
         checkpoint = "sentence-transformers-testing/stsb-bert-tiny-safetensors"
         text = "a nice text to embed"
 
-        embedder_def = SentenceTransformersTextEmbedder(model=checkpoint, precision="int8")
+        embedder_def = SentenceTransformersTextEmbedder(model=checkpoint, precision="binary")
         result_def = embedder_def.run(text=text)
         embedding_def = result_def["embedding"]
 
-        assert len(embedding_def) == 128
+        assert len(embedding_def) == 16
         assert all(isinstance(el, int) for el in embedding_def)
